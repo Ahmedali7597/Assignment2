@@ -50,55 +50,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleJsonResponse(data) {
         console.log('Received data:', data); // Log the entire data object
-        
-        // Parse the JSON string if it's a string, otherwise use it directly
+
         let itemsArray = typeof data === 'string' ? JSON.parse(data) : data;
-        
+
         contentDiv.innerHTML = ''; // Clear existing content
-    
-        itemsArray.forEach(item => {
-            const itemDiv = document.createElement('div');
-            itemDiv.style.width = '33.3333%'; // Assume 3 items, adjust for more/less
-            itemDiv.style.float = 'left'; // Make divs align horizontally
-            itemDiv.style.boxSizing = 'border-box'; // Include padding and border in the element's total width and height
-            
-            // Create and append the series title
-            const seriesTitle = document.createElement('h2');
-            seriesTitle.innerText = item.series;
-            itemDiv.appendChild(seriesTitle);
-            
-            // Create and append the image
-            const image = document.createElement('img');
-            image.src = item.url.replace(/\\/g, ''); // Remove escape characters for the URL
-            image.alt = item.name;
-            image.style.width = '100%'; // Make the image responsive to the div's width
-            image.style.height = 'auto';
-            itemDiv.appendChild(image);
-            
-            // Create and append the name caption
-            const nameCaption = document.createElement('p');
-            nameCaption.innerText = item.name;
-            itemDiv.appendChild(nameCaption);
-            
-            contentDiv.appendChild(itemDiv);
-        });
-    
-        // Adjust contentDiv style to handle overflow from floats
-        contentDiv.style.display = 'flex';
-        contentDiv.style.flexWrap = 'wrap';
-    }
-    
-    function setCopyrightNotice(choice) {
-        // Dynamically set the copyright notice
-        const copyright = document.createElement('p');
-        choice = choice.toLowerCase();
-        if (choice.includes('mario')) {
-            copyright.innerHTML = 'Game trademarks and copyrights are properties of their respective owners. Nintendo properties are trademarks of Nintendo. © 2019 Nintendo.';
-        } else if (choice.includes('starwars')) {
-            copyright.innerHTML = 'Star Wars © & TM 2022 Lucasfilm Ltd. All rights reserved. Visual material © 2022 Electronic Arts Inc.';
+
+        if (isTableRequired) {
+            // Generate a table with series, name, and link without images
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Add header row
+            const headerRow = document.createElement('tr');
+            ['Series', 'Name', 'Link'].forEach(text => {
+                const th = document.createElement('th');
+                th.innerText = text;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Add body rows
+            itemsArray.forEach(item => {
+                const bodyRow = document.createElement('tr');
+                ['series', 'name', 'url'].forEach(key => {
+                    const td = document.createElement('td');
+                    if (key === 'url') {
+                        const a = document.createElement('a');
+                        a.href = item[key];
+                        a.innerText = item[key];
+                        a.target = '_blank'; // Open link in a new tab
+                        td.appendChild(a);
+                    } else {
+                        td.innerText = item[key];
+                    }
+                    bodyRow.appendChild(td);
+                });
+                tbody.appendChild(bodyRow);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            contentDiv.appendChild(table);
+
+            // Adjust the table style
+            table.style.width = '100%';
+            table.border = '1';
         } else {
-            // Default or other cases can be added here
+            // Generate content with images for other buttons
+            itemsArray.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.style.width = '33.3333%';
+                itemDiv.style.float = 'left';
+                itemDiv.style.boxSizing = 'border-box';
+
+                const seriesTitle = document.createElement('h2');
+                seriesTitle.innerText = item.series;
+                itemDiv.appendChild(seriesTitle);
+
+                if (!isTableRequired) {
+                    const image = document.createElement('img');
+                    image.src = item.url.replace(/\\/g, '');
+                    image.alt = item.name;
+                    image.style.width = '100%';
+                    image.style.height = 'auto';
+                    itemDiv.appendChild(image);
+                }
+
+                const nameCaption = document.createElement('p');
+                nameCaption.innerText = item.name;
+                itemDiv.appendChild(nameCaption);
+
+                contentDiv.appendChild(itemDiv);
+            });
+
+            contentDiv.style.display = 'flex';
+            contentDiv.style.flexWrap = 'wrap';
         }
-        contentDiv.appendChild(copyright);
     }
-})
+});
