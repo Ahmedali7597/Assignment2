@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).then(data => {
             console.log(data);
             callback(data);
+           
         })
         .catch(error => console.error('Error:', error));
     }
@@ -48,16 +49,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleJsonResponse(data) {
-        console.log(data);
-        let itemsArray = Array.isArray(data) ? data : [data]; // Ensure we always have an array
+        console.log('Received data:', data); // Log the entire data object
+        
+        // Parse the JSON string if it's a string, otherwise use it directly
+        let itemsArray = typeof data === 'string' ? JSON.parse(data) : data;
+        
         contentDiv.innerHTML = ''; // Clear existing content
-    
-        // Calculate the width of each div based on the number of items
-        const widthPercent = 100 / itemsArray.length;
     
         itemsArray.forEach(item => {
             const itemDiv = document.createElement('div');
-            itemDiv.style.width = widthPercent + '%';
+            itemDiv.style.width = '33.3333%'; // Assume 3 items, adjust for more/less
             itemDiv.style.float = 'left'; // Make divs align horizontally
             itemDiv.style.boxSizing = 'border-box'; // Include padding and border in the element's total width and height
             
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Create and append the image
             const image = document.createElement('img');
-            image.src = item.url;
+            image.src = item.url.replace(/\\/g, ''); // Remove escape characters for the URL
             image.alt = item.name;
             image.style.width = '100%'; // Make the image responsive to the div's width
             image.style.height = 'auto';
@@ -85,8 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Adjust contentDiv style to handle overflow from floats
         contentDiv.style.display = 'flex';
         contentDiv.style.flexWrap = 'wrap';
-    
-        setCopyrightNotice(userInput.value);
     }
     
     function setCopyrightNotice(choice) {
