@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let isTableRequired = false;
 
     document.getElementById('btnFirst').addEventListener('click', function() {
-        fetchContent('', handleTextResponse);
+        fetchContent('', function(text) {
+            handleTextResponse(text + '000824753');
+        });
     });
 
     document.getElementById('btnSecond').addEventListener('click', function() {
