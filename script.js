@@ -47,65 +47,59 @@ document.addEventListener('DOMContentLoaded', function() {
         contentDiv.innerHTML = `<h1 style="text-align: center; width: 100%;">${text} ${studentNumber}</h1>`;
     }
 
+    function handleJsonResponse(data) {
+        console.log(data);
+        let itemsArray = Array.isArray(data) ? data : [data]; // Ensure we always have an array
+        contentDiv.innerHTML = ''; // Clear existing content
     
-function handleJsonResponse(json) {
-    console.log(json);
-    contentDiv.innerHTML = ''; // Clear existing content
-    if (!isTableRequired) {
-        // Handle display for individual items
-        const itemsDiv = document.createElement('div');
-        itemsDiv.className = 'items';
-        json.forEach(item => {
+        // Calculate the width of each div based on the number of items
+        const widthPercent = 100 / itemsArray.length;
+    
+        itemsArray.forEach(item => {
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'item';
-            itemDiv.innerHTML = `
-                <h2>${item.series}</h2>
-                <img src="${item.url}" alt="${item.name}" style="max-width: 100%;">
-                <p>${item.name}</p>
-            `;
-            itemsDiv.appendChild(itemDiv);
-        });
-        contentDiv.appendChild(itemsDiv);
-    } else {
-        // Handle table generation
-        const table = document.createElement('table');
-        table.className = 'table';
-        // Create a header row
-        const thead = table.createTHead();
-        const headerRow = thead.insertRow();
-        const headers = ['Name', 'Series', 'Image'];
-        headers.forEach(headerText => {
-            const headerCell = document.createElement('th');
-            headerCell.textContent = headerText;
-            headerRow.appendChild(headerCell);
-        });
-        // Insert data rows
-        const tbody = table.createTBody();
-        json.forEach(item => {
-            const row = tbody.insertRow();
-            const nameCell = row.insertCell();
-            nameCell.textContent = item.name;
-            const seriesCell = row.insertCell();
-            seriesCell.textContent = item.series;
-            const imageCell = row.insertCell();
+            itemDiv.style.width = widthPercent + '%';
+            itemDiv.style.float = 'left'; // Make divs align horizontally
+            itemDiv.style.boxSizing = 'border-box'; // Include padding and border in the element's total width and height
+            
+            // Create and append the series title
+            const seriesTitle = document.createElement('h2');
+            seriesTitle.innerText = item.series;
+            itemDiv.appendChild(seriesTitle);
+            
+            // Create and append the image
             const image = document.createElement('img');
             image.src = item.url;
             image.alt = item.name;
-            image.style.maxWidth = '100px'; // Set a max-width for images
-            imageCell.appendChild(image);
+            image.style.width = '100%'; // Make the image responsive to the div's width
+            image.style.height = 'auto';
+            itemDiv.appendChild(image);
+            
+            // Create and append the name caption
+            const nameCaption = document.createElement('p');
+            nameCaption.innerText = item.name;
+            itemDiv.appendChild(nameCaption);
+            
+            contentDiv.appendChild(itemDiv);
         });
-        contentDiv.appendChild(table);
+    
+        // Adjust contentDiv style to handle overflow from floats
+        contentDiv.style.display = 'flex';
+        contentDiv.style.flexWrap = 'wrap';
+    
+        setCopyrightNotice(userInput.value);
     }
-    // Handle copyright notice dynamically based on content
-    handleCopyright(json);
-}
-
-function handleCopyright(json) {
-    if (choice.includes('mario')) {
-        copyright.innerHTML = 'Game trademarks and copyrights are properties of their respective owners. Nintendo properties are trademarks of Nintendo. © 2019 Nintendo.';
-    } else if (choice.includes('starwars')) {
-        copyright.innerHTML = 'Star Wars © & TM 2022 Lucasfilm Ltd. All rights reserved. Visual material © 2022 Electronic Arts Inc.';
+    
+    function setCopyrightNotice(choice) {
+        // Dynamically set the copyright notice
+        const copyright = document.createElement('p');
+        choice = choice.toLowerCase();
+        if (choice.includes('mario')) {
+            copyright.innerHTML = 'Game trademarks and copyrights are properties of their respective owners. Nintendo properties are trademarks of Nintendo. © 2019 Nintendo.';
+        } else if (choice.includes('starwars')) {
+            copyright.innerHTML = 'Star Wars © & TM 2022 Lucasfilm Ltd. All rights reserved. Visual material © 2022 Electronic Arts Inc.';
+        } else {
+            // Default or other cases can be added here
+        }
+        contentDiv.appendChild(copyright);
     }
-    contentDiv.appendChild(copyright);
-}
 })
