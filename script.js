@@ -28,8 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url, {
             method: method,
             body: body
-        }).then(response => response[method === 'GET' ? 'text' : 'json']())
-          .then(data => callback(data))
+        }).then(response => response.json()) // Explicitly parse as JSON
+          .then(data => {
+              console.log(data); // Log the parsed data
+              callback(data);
+          })
           .catch(error => console.error('Error:', error));
     }
 
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleJsonResponse(json) {
+        console.log(json);
         contentDiv.innerHTML = ''; // Clear existing content
         if (!isTableRequired) {
             // Handle display for the second button
