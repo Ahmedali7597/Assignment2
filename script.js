@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let isTableRequired = false;
 
     document.getElementById('btnFirst').addEventListener('click', function() {
-        fetchContent('', function(text) {
-            handleTextResponse(text + '000824753');
+        fetchContent('https://csunix.mohawkcollege.ca/~adams/10259/a6_responder.php', function(text) {
+            handleTextResponse(text);
         });
     });
 
@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function handleTextResponse(text) {
-        contentDiv.innerHTML = `<h1 style="text-align: center; width: 100%;">${text}</h1>`;
+        const studentNumber = "000824753"; 
+        contentDiv.innerHTML = `<h1 style="text-align: center; width: 100%;">${text} ${studentNumber}</h1>`;
     }
 
     function handleJsonResponse(json) {
