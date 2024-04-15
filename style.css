@@ -1,0 +1,11 @@
+.image-container div {
+    float: left;
+}
+.image-container img {
+    width: 100%;
+    height: auto;
+}
+#responseContainer h1, .image-container h2, #responseTable, #copyright {
+    text-align: center;
+    width: 100%;
+}

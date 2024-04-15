@@ -28,12 +28,18 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url, {
             method: method,
             body: body
-        }).then(response => response.json()) // Explicitly parse as JSON
-          .then(data => {
-              console.log(data); // Log the parsed data
-              callback(data);
-          })
-          .catch(error => console.error('Error:', error));
+        }).then(response => {
+            const contentType = response.headers.get('Content-Type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text();
+            }
+        }).then(data => {
+            console.log(data);
+            callback(data);
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function handleTextResponse(text) {
@@ -41,45 +47,65 @@ document.addEventListener('DOMContentLoaded', function() {
         contentDiv.innerHTML = `<h1 style="text-align: center; width: 100%;">${text} ${studentNumber}</h1>`;
     }
 
-    function handleJsonResponse(json) {
-        console.log(json);
-        contentDiv.innerHTML = ''; // Clear existing content
-        if (!isTableRequired) {
-            // Handle display for the second button
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'row';
-            json.forEach(item => {
-                const colDiv = document.createElement('div');
-                colDiv.className = `col-${12 / json.length}`;
-                colDiv.innerHTML = `
-                    <h2>${item.series}</h2>
-                    <img src="${item.url}" alt="${item.name}" style="width: 100%;">
-                    <p>${item.name}</p>
-                `;
-                rowDiv.appendChild(colDiv);
-            });
-            contentDiv.appendChild(rowDiv);
-        } else {
-            // Handle table generation for the third button
-            const table = document.createElement('table');
-            table.className = 'table';
-            json.forEach(item => {
-                const row = table.insertRow();
-                Object.values(item).forEach(text => {
-                    const cell = row.insertCell();
-                    cell.textContent = text;
-                });
-            });
-            contentDiv.appendChild(table);
-        }
-        // Dynamically set the copyright notice
-        const copyright = document.createElement('p');
-        const choice = userInput.value.toLowerCase();
-        if (choice.includes('mario')) {
-            copyright.innerHTML = 'Game trademarks and copyrights are properties of their respective owners. Nintendo properties are trademarks of Nintendo. © 2019 Nintendo.';
-        } else if (choice.includes('starwars')) {
-            copyright.innerHTML = 'Star Wars © & TM 2022 Lucasfilm Ltd. All rights reserved. Visual material © 2022 Electronic Arts Inc.';
-        }
-        contentDiv.appendChild(copyright);
+    
+function handleJsonResponse(json) {
+    console.log(json);
+    contentDiv.innerHTML = ''; // Clear existing content
+    if (!isTableRequired) {
+        // Handle display for individual items
+        const itemsDiv = document.createElement('div');
+        itemsDiv.className = 'items';
+        json.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.innerHTML = `
+                <h2>${item.series}</h2>
+                <img src="${item.url}" alt="${item.name}" style="max-width: 100%;">
+                <p>${item.name}</p>
+            `;
+            itemsDiv.appendChild(itemDiv);
+        });
+        contentDiv.appendChild(itemsDiv);
+    } else {
+        // Handle table generation
+        const table = document.createElement('table');
+        table.className = 'table';
+        // Create a header row
+        const thead = table.createTHead();
+        const headerRow = thead.insertRow();
+        const headers = ['Name', 'Series', 'Image'];
+        headers.forEach(headerText => {
+            const headerCell = document.createElement('th');
+            headerCell.textContent = headerText;
+            headerRow.appendChild(headerCell);
+        });
+        // Insert data rows
+        const tbody = table.createTBody();
+        json.forEach(item => {
+            const row = tbody.insertRow();
+            const nameCell = row.insertCell();
+            nameCell.textContent = item.name;
+            const seriesCell = row.insertCell();
+            seriesCell.textContent = item.series;
+            const imageCell = row.insertCell();
+            const image = document.createElement('img');
+            image.src = item.url;
+            image.alt = item.name;
+            image.style.maxWidth = '100px'; // Set a max-width for images
+            imageCell.appendChild(image);
+        });
+        contentDiv.appendChild(table);
     }
-});
+    // Handle copyright notice dynamically based on content
+    handleCopyright(json);
+}
+
+function handleCopyright(json) {
+    if (choice.includes('mario')) {
+        copyright.innerHTML = 'Game trademarks and copyrights are properties of their respective owners. Nintendo properties are trademarks of Nintendo. © 2019 Nintendo.';
+    } else if (choice.includes('starwars')) {
+        copyright.innerHTML = 'Star Wars © & TM 2022 Lucasfilm Ltd. All rights reserved. Visual material © 2022 Electronic Arts Inc.';
+    }
+    contentDiv.appendChild(copyright);
+}
+})
